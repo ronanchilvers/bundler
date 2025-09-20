@@ -1,0 +1,4 @@
+vendor/
+build/
+*.log
+.phpunit.cache
