@@ -2,3 +2,6 @@ vendor/
 build/
 *.log
 .phpunit.cache
+dest/
+source/
+test.php
