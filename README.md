@@ -16,10 +16,17 @@ A simple bundler to concatenate and version static files, optionally writing cor
 - Configure bundler
 ```yaml
 ---
+
 ```
 - Add bundler to your templates
 ```html
-
+<?php
+use RonanChilds\Bundler\Bundler;
+?>
+<?= Bundler::stylesheet([
+    'resources/css/one.css',
+    'resources/css/two.css',
+]);
 ```
 
 ## Development & Testing
