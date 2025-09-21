@@ -11,6 +11,7 @@ use Ronanchilvers\Bundler\Output\Decorator\Concatenate;
 use Ronanchilvers\Bundler\Output\Element\Script;
 use Ronanchilvers\Bundler\Output\Element\Stylesheet;
 use Ronanchilvers\Bundler\Output\FormatterInterface;
+use Ronanchilvers\Bundler\Path\Bundle as PathBundle;
 
 #[CoversClass(Bundler::class)]
 final class BundlerTest extends TestCase
@@ -54,10 +55,11 @@ final class BundlerTest extends TestCase
     public function testStylesheetRendersMultiplePathsWithEscaping(): void
     {
         $formatter = Bundler::stylesheet();
-        $html = $formatter->render([
+        $bundle = new PathBundle([
             'css/app.css',
             'css/theme&v=1.css',
         ]);
+        $html = $formatter->render($bundle);
 
         // Should contain two link tags
         $this->assertEquals(2, substr_count($html, '<link '));
@@ -74,10 +76,11 @@ final class BundlerTest extends TestCase
     public function testScriptRendersMultiplePaths(): void
     {
         $formatter = Bundler::script();
-        $html = $formatter->render([
+        $bundle = new PathBundle([
             'js/app.js',
             'js/vendor/lib.js',
         ]);
+        $html = $formatter->render($bundle);
 
         $this->assertEquals(2, substr_count($html, '<script '));
         $this->assertStringContainsString('src="js/app.js"', $html);
@@ -103,10 +106,10 @@ final class BundlerTest extends TestCase
             // Using defaults for bundle_basename
         ]);
 
-        $html = $formatter->render([
+        $html = $formatter->render(new PathBundle([
             'app.css',
             'extra.css',
-        ]);
+        ]));
 
         // Should produce a single link tag
         $this->assertEquals(1, substr_count($html, '<link '));
@@ -142,7 +145,8 @@ final class BundlerTest extends TestCase
             'bundle_basename' => 'app-bundle',
         ]);
 
-        $html = $formatter->render(['alpha.js', 'beta.js']);
+        $bundle = new PathBundle(['alpha.js', 'beta.js']);
+        $html = $formatter->render($bundle);
 
         $this->assertEquals(1, substr_count($html, '<script '));
 
