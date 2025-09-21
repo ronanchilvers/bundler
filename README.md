@@ -23,12 +23,37 @@ A simple bundler to concatenate and version static files, optionally writing cor
 - Add bundler to your templates
 ```html
 <?php
-use RonanChilds\Bundler\Bundler;
+use Ronanchilvers\Bundler\Bundler;
 ?>
-<?= Bundler::stylesheet([
-    'resources/css/one.css',
-    'resources/css/two.css',
-]);
+<html>
+    <head>
+    <title>Testing 123</title>
+<?= Bundler::stylesheet()
+    ->decorate(SRI::class, [
+        'source' => __DIR__ . '/source/css',
+        'algorithms' => ['sha384'],
+    ])
+    ->render([
+        'resources/css/one.css',
+        'resources/css/two.css',
+    ]);
+?>
+    </head>
+    <body>
+        <h1>Hallo!</h1>
+        <p>lorem ipsum quod erat</p>
+<?= Bundler::javascript()
+    ->decorate(SRI::class, [
+        'source' => __DIR__ . '/source/js',
+        'algorithms' => ['sha384'],
+    ])
+    ->render([
+        'resources/js/one.js',
+        'resources/js/two.js',
+    ]);
+?>
+    </body>
+</html>
 ```
 
 ## Development & Testing
