@@ -6,6 +6,7 @@ namespace Ronanchilvers\Bundler\Output\Decorator;
 
 use Ronanchilvers\Bundler\Output\FormatterInterface;
 use Ronanchilvers\Bundler\Output\Traits\DecorateTrait;
+use Ronanchilvers\Bundler\Path\Bundle;
 
 abstract class Decorator implements FormatterInterface
 {
@@ -16,21 +17,26 @@ abstract class Decorator implements FormatterInterface
     public function __construct(FormatterInterface $inner)
     {
         $this->inner = $inner;
+        $this->setup();
     }
 
     /**
      * @param array<int,mixed> $paths
      */
-    public function render(array $paths): string
+    public function render(Bundle $bundle): string
     {
-        $paths = $this->modifyPaths($paths);
+        $bundle = $this->modifyPaths($bundle);
 
-        return $this->inner->render($paths);
+        return $this->inner->render($bundle);
+    }
+
+    protected function setup(): void
+    {
     }
 
     /**
      * @param array<int,mixed> $paths
      * @return void
      */
-    abstract protected function modifyPaths(array $paths): array;
+    abstract protected function modifyPaths(Bundle $bundle): Bundle;
 }

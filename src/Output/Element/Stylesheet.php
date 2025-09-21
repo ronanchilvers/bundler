@@ -4,13 +4,26 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler\Output\Element;
 
+use Ronanchilvers\Bundler\Path\Bundle;
+
 class Stylesheet extends Element
 {
-    public function render(array $paths): string
+    public function render(Bundle $bundle): string
     {
         $tags = [];
-        foreach ($paths as $path) {
-            $tags[] = '<link rel="stylesheet" href="' . htmlspecialchars($path) . '">';
+        foreach ($bundle as $path) {
+            $tag = '<link rel="stylesheet" href="' .
+                htmlspecialchars($path) .
+                '"';
+            $attributeArray = $bundle->attributes($path);
+            $attributes = [];
+            foreach ($attributeArray as $key => $value) {
+                $attributes[] = $key . '="' . htmlspecialchars((string)$value) . '"';
+            }
+            $tag .= ' ' . implode(" ", $attributes);
+            $tag .= '>';
+
+            $tags[] = $tag;
         }
 
         return implode("\n", $tags);

@@ -10,20 +10,6 @@ use Ronanchilvers\Bundler\Output\FormatterInterface;
 
 class Bundler
 {
-    private static $config = [
-        'source_root' => null,
-        'destination_root' => null,
-        'decorators' => [],
-    ];
-
-    /**
-     * @param array<int,mixed> $array
-     */
-    public static function config(array $array): void
-    {
-        self::$config = array_merge(self::$config, $array);
-    }
-
     /**
      * @param array<int,string> $files
      * @return string
@@ -43,19 +29,6 @@ class Bundler
 
     protected static function createFormatter(string $class): FormatterInterface
     {
-        $formatter = static::decorateFormatter(
-            new $class()
-        );
-
-        return $formatter;
-    }
-
-    protected static function decorateFormatter(FormatterInterface $formatter): FormatterInterface
-    {
-        foreach (self::$config['decorators'] as $decorator) {
-            $formatter = new $decorator($formatter);
-        }
-
-        return $formatter;
+        return new $class();
     }
 }

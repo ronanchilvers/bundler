@@ -10,6 +10,7 @@ A simple bundler to concatenate and version static files, optionally writing cor
 - [ ] Support versioning (cache busting)
 - [ ] Support multiple bundles
 - [ ] Facilitate extending to add extra features such as minification
+- [ ] Implement a Config object to centralise configuration variables
 
 ## Usage
 
