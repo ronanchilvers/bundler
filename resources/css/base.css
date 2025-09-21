@@ -1,0 +1,44 @@
+* {
+    box-sizing: border-box;
+}
+html {
+    line-height: 1;
+    font-size: 18px;
+}
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background: rgb(13,99,177);
+}
+h1, h2, h3, h4 {
+    padding: 0;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+header {
+    padding: 1rem;
+    background-color: rgb(10,82,145);
+    color: rgb(255,255,255);
+}
+input, textarea {
+    font-size: 1rem;
+    padding: 0.25rem 0.35rem;
+    background: rgba(139, 149, 158, 0.5);
+}
+textarea {
+    line-height: 1.5;
+}
+button {
+    border: 0;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    background-color: rgb(200,200,200);
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &.ok {
+        background-color: rgb(82,179,62);
+        color: rgb(240,240,240);
+    }
+}

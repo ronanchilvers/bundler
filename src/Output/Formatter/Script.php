@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Tag\Script;
+namespace Ronanchilvers\Bundler\Output\Formatter;
 
+use Ronanchilvers\Bundler\Manifest;
+use Ronanchilvers\Bundler\Output\Formatter;
 use Ronanchilvers\Bundler\Path\Bundle;
 
-class Module extends Script
+class Script extends Formatter
 {
-    public function render(Bundle $bundle): string
+    public function render(Bundle $bundle): Bundle
     {
         $tags = [];
         foreach ($bundle as $path) {
@@ -26,6 +28,6 @@ class Module extends Script
             $tags[] = $tag;
         }
 
-        return implode("\n", $tags);
+        return $bundle;
     }
 }

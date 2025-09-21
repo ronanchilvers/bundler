@@ -4,12 +4,31 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler;
 
-use Ronanchilvers\Bundler\Output\Tag\Script;
-use Ronanchilvers\Bundler\Output\Tag\Stylesheet;
+use Ronanchilvers\Bundler\Config;
+use Ronanchilvers\Bundler\Output\Formatter\Script;
+use Ronanchilvers\Bundler\Output\Formatter\Script\Module;
+use Ronanchilvers\Bundler\Output\Formatter\Stylesheet;
 use Ronanchilvers\Bundler\Output\FormatterInterface;
 
 class Bundler
 {
+    /**
+     * Config store object
+     * @var Config|null
+     */
+    protected static $config = null;
+
+    /**
+     * Registry for configured bundlers
+     * @var array<string,FormatterInterface>
+     */
+    protected static $registry = [];
+
+    public static function setConfig(Config $config): void
+    {
+        static::$config = $config;
+    }
+
     /**
      * @param array<int,string> $files
      * @return string

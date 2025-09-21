@@ -1,0 +1,16 @@
+#!/bin/env php
+<?php
+
+/**
+ * Bundler CLI tool
+ * mode: php
+ */
+
+// use Ronanchilvers\Bundler\Bundler;
+
+foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}

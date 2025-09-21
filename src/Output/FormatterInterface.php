@@ -11,7 +11,7 @@ interface FormatterInterface
     /**
      * @param array<int,mixed> $paths
      */
-    public function render(Bundle $paths): string;
+    public function render(Bundle $paths): Bundle;
 
     /**
      * Decorate this formatter with a decorator class.

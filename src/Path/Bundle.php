@@ -73,6 +73,11 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
         return array_keys($this->paths);
     }
 
+    public function toArray(): array
+    {
+        return $this->paths;
+    }
+
     /**
      * Countable: number of paths in the bundle.
      */
