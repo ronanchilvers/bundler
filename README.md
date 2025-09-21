@@ -15,12 +15,6 @@ A simple bundler to concatenate and version static files, optionally writing cor
 
 ## Usage
 
-- Configure bundler
-```yaml
----
-
-```
-- Add bundler to your templates
 ```html
 <?php
 use Ronanchilvers\Bundler\Bundler;
