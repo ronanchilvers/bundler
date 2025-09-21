@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Element;
+namespace Ronanchilvers\Bundler\Output\Tag;
 
 use Ronanchilvers\Bundler\Path\Bundle;
 
-class Script extends Element
+class Stylesheet extends Tag
 {
     public function render(Bundle $bundle): string
     {
         $tags = [];
         foreach ($bundle as $path) {
-            $tag = '<script src="' .
+            $tag = '<link rel="stylesheet" href="' .
                 htmlspecialchars($path) .
                 '"';
             $attributeArray = $bundle->attributes($path);
@@ -21,7 +21,7 @@ class Script extends Element
                 $attributes[] = $key . '="' . htmlspecialchars((string)$value) . '"';
             }
             $tag .= ' ' . implode(" ", $attributes);
-            $tag .= '></script>';
+            $tag .= '>';
 
             $tags[] = $tag;
         }

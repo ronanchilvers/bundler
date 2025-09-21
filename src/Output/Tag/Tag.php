@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Element;
+namespace Ronanchilvers\Bundler\Output\Tag;
 
 use Ronanchilvers\Bundler\Output\FormatterInterface;
 use Ronanchilvers\Bundler\Output\Traits\DecorateTrait;
 use Ronanchilvers\Bundler\Path\Bundle;
 
-abstract class Element implements FormatterInterface
+abstract class Tag implements FormatterInterface
 {
     use DecorateTrait;
 
