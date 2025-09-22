@@ -7,13 +7,17 @@ namespace Ronanchilvers\Bundler;
 use Ronanchilvers\Bundler\Output\Formatter;
 use Ronanchilvers\Bundler\Output\FormatterInterface;
 use Ronanchilvers\Bundler\Path\Bundle;
+use Ronanchilvers\Bundler\Events\Dispatcher;
+use Ronanchilvers\Bundler\Events\EventNames;
 use Symfony\Component\Yaml\Yaml;
 
 class Builder
 {
-    public static function fromYamlFile(string $yamlFile): static
-    {
-        $instance = new static();
+    public static function fromYamlFile(
+        string $yamlFile,
+        ?Dispatcher $events = null,
+    ): static {
+        $instance = new static($events);
         $settings = Yaml::parseFile($yamlFile);
 
         $dirname = realpath(dirname($yamlFile));
@@ -38,24 +42,35 @@ class Builder
         );
         $globalDecorators = @$settings["decorators"] ?: [];
 
-        foreach ($settings["bundles"] as $name => $bundle) {
+        foreach ($settings["bundles"] as $name => $bundleDef) {
+            $events?->emit(EventNames::CONFIG_BUNDLE_START, [
+                "name" => $name,
+                "config" => $bundleDef,
+            ]);
             $decorators = array_merge(
                 $globalDecorators,
-                @$bundle["decorators"] ?: [],
+                @$bundleDef["decorators"] ?: [],
             );
-            if (!isset($bundle["formatter"])) {
+            if (!isset($bundleDef["formatter"])) {
                 throw new \InvalidArgumentException(
                     'No formatter specified for bundle \'' . $name . '\'',
                 );
             }
-            $formatter = Formatter::factory($bundle["formatter"]);
-            foreach ($decorators as $class => $settings) {
-                $config = array_merge($globalSettings, $settings ?: []);
+            $formatter = Formatter::factory($bundleDef["formatter"]);
+            foreach ($decorators as $class => $dSettings) {
+                $config = array_merge($globalSettings, $dSettings ?: []);
                 $formatter = $formatter->decorate($class, $config);
             }
-            $pathBundle = new Bundle();
-            $pathBundle->addMany($bundle["paths"]);
+            $pathBundle = new Bundle([], $events, $name);
+            foreach ($bundleDef["paths"] as $p) {
+                $pathBundle->add($p);
+            }
             $instance->addBundle($name, $formatter, $pathBundle);
+            $events?->emit(EventNames::CONFIG_BUNDLE_END, [
+                "name" => $name,
+                "bundle" => $pathBundle,
+                "formatter" => $formatter,
+            ]);
         }
 
         return $instance;
@@ -63,7 +78,7 @@ class Builder
 
     protected $bundles = [];
 
-    public function __construct() {}
+    public function __construct(protected ?Dispatcher $events = null) {}
 
     public function addBundle(
         string $name,

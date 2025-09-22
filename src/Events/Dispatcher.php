@@ -5,41 +5,28 @@ declare(strict_types=1);
 namespace Ronanchilvers\Bundler\Events;
 
 /**
- * A very small and straightforward event system.
+ * Minimal event dispatcher supporting both legacy variadic listener calls
+ * via emit() and richer Event objects via dispatch(Event).
  *
- * Features:
- * - Register any number of listeners for any string event name
- * - Dispatch events with arbitrary arguments
- * - Arguments are passed directly to the listener as call arguments
- *
- * Basic usage:
- *
- * $dispatcher = new Dispatcher();
- *
- * $dispatcher->on('asset.bundled', function (string $name) {
- *     // ... do something
- * });
- *
- * $event = $dispatcher->dispatch('asset.bundled', [
- *     "Fred"
- * ]);
+ * New behaviour:
+ *  - emit(string, array $payload) wraps payload into an Event internally
+ *    (backwards compatible with existing tests / listeners expecting raw args)
+ *  - dispatch(Event $event) passes a single Event instance to each listener
+ *  - Listeners can stop propagation by calling $event->stop()
  */
 final class Dispatcher
 {
     /**
-     * @var array<string, array<int, array<int, callable(Event): mixed>>>
-     * Structure: [eventName => [priority => [listener, ...], ...], ...]
+     * @var array<string, array<int, callable>>
      */
     private array $listeners = [];
 
     /**
-     * Register a listener for an event.
+     * Register a listener for an event name.
      *
-     * Higher priority listeners run first. Priority can be negative.
-     *
-     * @param string   $eventName
-     * @param callable $listener  function (Event $event): mixed
-     * @return $this
+     * Listener signature options:
+     *  - function (Event $event): void
+     *  - function (...$args): void   (legacy emit style; receives expanded payload values)
      */
     public function on(string $eventName, callable $listener): self
     {
@@ -49,32 +36,24 @@ final class Dispatcher
 
     /**
      * Remove one or all listeners for an event.
-     *
-     * If $listener is null, all listeners for the event are removed.
      */
     public function off(string $eventName, ?callable $listener = null): self
     {
         if (!isset($this->listeners[$eventName])) {
             return $this;
         }
-
         if ($listener === null) {
             unset($this->listeners[$eventName]);
             return $this;
         }
-
-        foreach ($this->listeners[$eventName] as $listeners) {
-            foreach ($listeners as $index => $registered) {
-                if ($registered === $listener) {
-                    unset($this->listeners[$eventName][$index]);
-                }
+        foreach ($this->listeners[$eventName] as $i => $registered) {
+            if ($registered === $listener) {
+                unset($this->listeners[$eventName][$i]);
             }
         }
-
-        if ($this->listeners[$eventName] === []) {
+        if (!$this->listeners[$eventName]) {
             unset($this->listeners[$eventName]);
         }
-
         return $this;
     }
 
@@ -87,21 +66,52 @@ final class Dispatcher
     }
 
     /**
-     * Dispatch an event.
+     * Backwards compatible emit: accepts a payload array (ordered values)
+     * which will be provided to legacy listeners as variadic arguments,
+     * and also made available to Event listeners via $event->payload().
      *
-     * @param string $eventName
-     * @param array  $payload   Arbitrary associative data for listeners
-     * @return Event The dispatched event instance
+     * NOTE: The payload is treated as a numeric list here; if you need
+     * named / associative data, prefer creating a tailored Event subclass
+     * or placing a keyed array inside a single payload element.
      */
     public function emit(string $eventName, array $payload = []): void
     {
-        foreach ($this->listeners($eventName) as $listener) {
-            $result = $listener(...$payload);
-        }
+        // We create an Event whose payload is keyed numerically so that
+        // dispatch() can still give the full Event object to modern listeners.
+        $event = new Event($eventName, $payload);
+        $this->dispatch($event);
     }
 
     /**
-     * Remove all listeners for all events.
+     * Dispatch an Event object to all listeners registered for its name.
+     * Propagation stops if a listener calls $event->stop().
+     */
+    public function dispatch(Event $event): Event
+    {
+        foreach ($this->listeners($event->name()) as $listener) {
+            // Heuristic: if listener expects 1 parameter we pass Event;
+            // otherwise we expand numeric payload values (legacy style).
+            $ref = is_array($listener)
+                ? new \ReflectionMethod($listener[0], $listener[1])
+                : (is_object($listener) && !$listener instanceof \Closure
+                    ? new \ReflectionMethod($listener, "__invoke")
+                    : new \ReflectionFunction($listener));
+
+            if ($ref->getNumberOfParameters() === 1) {
+                $listener($event);
+            } else {
+                $listener(...$event->payload());
+            }
+
+            if ($event->isStopped()) {
+                break;
+            }
+        }
+        return $event;
+    }
+
+    /**
+     * Remove all listeners.
      */
     public function clear(): self
     {
@@ -110,21 +120,12 @@ final class Dispatcher
     }
 
     /**
-     * Get the (sorted) listeners for an event.
+     * Get listeners for a specific event name.
      *
-     * @return array<int, callable(Event): mixed>
+     * @return array<int, callable>
      */
     protected function listeners(string $eventName): array
     {
-        if (!$this->hasListeners($eventName)) {
-            return [];
-        }
-
-        $ordered = [];
-        foreach ($this->listeners[$eventName] as $listener) {
-            $ordered[] = $listener;
-        }
-
-        return $ordered;
+        return $this->listeners[$eventName] ?? [];
     }
 }

@@ -21,7 +21,10 @@ abstract class Decorator implements FormatterInterface
     }
 
     /**
-     * @param array<int,mixed> $paths
+     * Render the bundle after giving this decorator a chance
+     * to adjust paths or attributes. Returns the (possibly
+     * modified or replaced) Bundle passed down to the inner
+     * formatter chain.
      */
     public function render(Bundle $bundle): Bundle
     {
@@ -30,13 +33,18 @@ abstract class Decorator implements FormatterInterface
         return $this->inner->render($bundle);
     }
 
-    protected function setup(): void
-    {
-    }
+    protected function setup(): void {}
 
     /**
-     * @param array<int,mixed> $paths
-     * @return void
+     * Allow the decorator to adjust the bundle (add / remove
+     * paths, set attributes, write derived assets, etc.).
+     *
+     * Implementations MUST return the Bundle instance that should
+     * be passed to the inner formatter. They MAY return a new
+     * Bundle object.
+     *
+     * @param Bundle $bundle
+     * @return Bundle
      */
     abstract protected function modifyPaths(Bundle $bundle): Bundle;
 }

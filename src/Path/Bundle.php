@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler\Path;
 
+use Ronanchilvers\Bundler\Events\Dispatcher;
+use Ronanchilvers\Bundler\Events\EventNames;
+use Ronanchilvers\Bundler\Events\FileAddingEvent;
+
 /**
  * @implements \ArrayAccess<int,string>
  * @implements \IteratorAggregate<int,string>
@@ -11,20 +15,54 @@ namespace Ronanchilvers\Bundler\Path;
 class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     protected array $paths = [];
+    protected ?Dispatcher $events = null;
+    protected ?string $bundleName = null;
 
     /**
      * @param array<int,string> $paths Initial path list (optional)
+     * @param Dispatcher|null $events  Optional event dispatcher
+     * @param string|null $bundleName  Logical bundle name for events
      */
-    public function __construct(array $paths = [])
-    {
+    public function __construct(
+        array $paths = [],
+        ?Dispatcher $events = null,
+        ?string $bundleName = null,
+    ) {
+        $this->events = $events;
+        $this->bundleName = $bundleName;
         $this->addMany($paths);
+    }
+
+    public function setBundleName(?string $name): self
+    {
+        $this->bundleName = $name;
+        return $this;
     }
 
     public function add(string $path): static
     {
+        if ($this->events) {
+            $event = new FileAddingEvent(EventNames::CONFIG_FILE_ADDING, [
+                "bundle" => $this->bundleName,
+                "path" => $path,
+            ]);
+            $this->events->dispatch($event);
+            if ($event->isStopped()) {
+                return $this; // cancelled
+            }
+            $path = $event->getPath();
+        }
+
         $this->paths[$path] = [
-            'path' => $path,
+            "path" => $path,
         ];
+
+        if ($this->events) {
+            $this->events->emit(EventNames::CONFIG_FILE_ADDED, [
+                "bundle" => $this->bundleName,
+                "path" => $path,
+            ]);
+        }
 
         return $this;
     }
@@ -50,17 +88,17 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         if (!isset($this->paths[$path])) {
             $this->paths[$path] = [
-                'path' => $path,
+                "path" => $path,
             ];
         }
-        $this->paths[$path]['attributes'][$key] = $value;
+        $this->paths[$path]["attributes"][$key] = $value;
 
         return $this;
     }
 
     public function attributes(string $path): array
     {
-        return $this->paths[$path]['attributes'] ?? [];
+        return $this->paths[$path]["attributes"] ?? [];
     }
 
     /**
@@ -123,7 +161,7 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
     public function offsetGet(mixed $offset): mixed
     {
         if (is_string($offset)) {
-            return $this->paths[$offset]['path'] ?? null;
+            return $this->paths[$offset]["path"] ?? null;
         }
         if (is_int($offset)) {
             $keys = array_keys($this->paths);
@@ -144,7 +182,9 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         if ($offset === null) {
             if (!is_string($value)) {
-                throw new \InvalidArgumentException('Appending requires a string path');
+                throw new \InvalidArgumentException(
+                    "Appending requires a string path",
+                );
             }
             $this->add($value);
             return;
@@ -152,11 +192,15 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
 
         if (is_int($offset)) {
             // Integer offsets not directly settable (ambiguous) – require string
-            throw new \InvalidArgumentException('Integer offsets not supported for assignment; use string path keys or append');
+            throw new \InvalidArgumentException(
+                "Integer offsets not supported for assignment; use string path keys or append",
+            );
         }
 
         if (!is_string($offset)) {
-            throw new \InvalidArgumentException('Offset must be a string (path)');
+            throw new \InvalidArgumentException(
+                "Offset must be a string (path)",
+            );
         }
 
         // If value omitted / null => ensure offset path exists
@@ -166,7 +210,9 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         if (!is_string($value)) {
-            throw new \InvalidArgumentException('Assigned value must be a string path or null');
+            throw new \InvalidArgumentException(
+                "Assigned value must be a string path or null",
+            );
         }
 
         // Replace (remove old key if different) and add new path

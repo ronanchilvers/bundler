@@ -1,5 +1,6 @@
 #!/bin/env php
 <?php
+
 /**
  * Bundler CLI tool
  * mode: php
@@ -12,7 +13,10 @@ use GetOptionKit\OptionParser;
 use GetOptionKit\OptionPrinter\ConsoleOptionPrinter;
 use Ronanchilvers\Bundler\Builder;
 use Ronanchilvers\Bundler\Cli;
+use Ronanchilvers\Bundler\Events\Dispatcher;
+use Ronanchilvers\Bundler\Events\EventNames;
 use Ronanchilvers\Bundler\Manifest;
+use Ronanchilvers\Bundler\Processor;
 use Ronanchilvers\Bundler\Watcher\File;
 
 $baseDir = null;
@@ -28,19 +32,18 @@ foreach (
     }
 }
 
-function build(string $filename, string $manifestFilename)
-{
-    Cli::info($filename . " - starting build");
-    $builder = Builder::fromYamlFile($filename);
-    $manifest = new Manifest();
-    foreach ($builder->bundles() as $name => $bundle) {
-        ["formatter" => $formatter, "bundle" => $bundle] = $bundle;
-        $bundle = $formatter->render($bundle);
-        $manifest->add($name, $bundle);
-    }
-
+function build(
+    string $filename,
+    string $manifestFilename,
+    ?Dispatcher $events
+) {
+    $builder = Builder::fromYamlFile(
+        $filename,
+        $events
+    );
+    $processor = new Processor($events);
+    $manifest = $processor->run($builder);
     $manifest->store($manifestFilename);
-    Cli::info($filename . " - build complete");
 }
 
 // Handle CLI options
@@ -68,6 +71,10 @@ try {
 
     $configFilename = $result->keys["config"]->value;
     $manifestFilename = $result->keys["manifest"]->value;
+    $events = new Dispatcher();
+    $events->on(EventNames::WATCHER_START, function () {
+        Cli::info("Watcher started");
+    });
 
     switch (true) {
         case true == $result->keys["help"]->value:
@@ -77,16 +84,17 @@ try {
             break;
         case true == $result->keys["watch"]->value:
             Cli::info($configFilename . " - starting watch");
-            $watcher = new File();
+            $watcher = new File($events);
             $watcher->addFile($configFilename);
             $watcher->start(function (string $filename) use (
                 $manifestFilename,
+                $events,
             ) {
-                build($filename, $manifestFilename);
+                build($filename, $manifestFilename, $events);
             });
             break;
         default:
-            build($configFilename, $manifestFilename);
+            build($configFilename, $manifestFilename, $events);
             break;
     }
 } catch (Exception $e) {
@@ -94,4 +102,3 @@ try {
     exit(1);
 }
 exit(0);
-

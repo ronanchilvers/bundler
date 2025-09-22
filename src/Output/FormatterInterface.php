@@ -9,9 +9,11 @@ use Ronanchilvers\Bundler\Path\Bundle;
 interface FormatterInterface
 {
     /**
-     * @param array<int,mixed> $paths
+     * Render the provided bundle and return a (possibly modified) bundle.
+     *
+     * @param Bundle $bundle
      */
-    public function render(Bundle $paths): Bundle;
+    public function render(Bundle $bundle): Bundle;
 
     /**
      * Decorate this formatter with a decorator class.
@@ -22,5 +24,8 @@ interface FormatterInterface
      * @param array<int|string,mixed> $config
      * @return FormatterInterface
      */
-    public function decorate(string $class, array $config = []): FormatterInterface;
+    public function decorate(
+        string $class,
+        array $config = [],
+    ): FormatterInterface;
 }
