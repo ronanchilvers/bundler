@@ -72,7 +72,7 @@ class Builder
         Bundle $bundle,
     ): static {
         $this->bundles[$name] = [
-            'formatter' => $formatter,
+            'formatter' => $formatter,tch
             'bundle' => $bundle,
         ];
 

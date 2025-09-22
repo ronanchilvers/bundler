@@ -8,24 +8,35 @@ use Closure;
 
 class File
 {
-    protected $filename;
+    protected int $interval;
+    protected array $files = [];
 
-    public function __construct(string $filename)
+    public function __construct(int $interval = 250)
     {
-        $this->filename = $filename;
+        $this->interval = $interval;
+    }
+
+    public function addFile(string $filename): static
+    {
+        if (!file_exists($filename) || !is_readable($filename)) {
+            throw new \InvalidArgumentException(sprintf('Cannot read file %s', $filename));
+        }
+        $this->files[$filename] = filemtime($filename);
+
+        return $this;
     }
 
     public function start(Closure $closure): bool
     {
-        $closure($this->filename);
         while (true) {
             clearstatcache();
-            $lastModified = filemtime($this->filename);
-            usleep(250);
-            clearstatcache();
-            if (filemtime($this->filename) !== $lastModified) {
-                $closure($this->filename);
+            foreach ($this->files as $filename => $lastModified) {
+                if (filemtime($filename) !== $lastModified) {
+                    $closure($filename);
+                }
+                $this->files[$filename] = filemtime($filename);
             }
+            usleep($this->interval);
         }
 
         return true;
