@@ -2,6 +2,10 @@
     "name": "ronanchilvers/bundler",
     "description": "Simple file bundler",
     "type": "library",
+    "require": {
+        "corneltek/getoptionkit": "^2.7",
+        "symfony/yaml": "^7.3"
+    },
     "require-dev": {
         "phpunit/phpunit": "^11.5"
     },
@@ -17,11 +21,13 @@
             "email": "ronan@thelittledot.com"
         }
     ],
-    "require": {},
     "scripts": {
         "test": "vendor/bin/phpunit",
         "test:coverage": "vendor/bin/phpunit --coverage-text --coverage-html build/coverage/html",
         "test:ci": "vendor/bin/phpunit --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml",
         "test:dox": "vendor/bin/phpunit --testdox"
+    },
+    "config": {
+      "sort-packages": true
     }
 }

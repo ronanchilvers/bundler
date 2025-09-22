@@ -14,10 +14,10 @@ class Concatenate extends Decorator
     protected function modifyPaths(Bundle $paths): Bundle
     {
         $source = rtrim($this->getConfig('source'), DIRECTORY_SEPARATOR);
-        $destination = rtrim($this->getConfig('destination'), DIRECTORY_SEPARATOR);
-        if (!is_dir($destination)) {
+        $webroot = rtrim($this->getConfig('webroot'), DIRECTORY_SEPARATOR);
+        if (!is_dir($webroot)) {
             throw new \RuntimeException(
-                sprintf('Destination %s is not a valid directory', $destination)
+                sprintf('Destination %s is not a valid directory', $webroot)
             );
         }
         $content = [];
@@ -50,10 +50,10 @@ class Concatenate extends Decorator
             $hash,
             $extension,
         );
-        $destinationFilename = $this->joinPaths($destination, $filename);
-        if (!$this->writeFile($destinationFilename, $content)) {
+        $webrootFilename = $this->joinPaths($webroot, $filename);
+        if (!$this->writeFile($webrootFilename, $content)) {
             throw new \RuntimeException(
-                sprintf('Could not write to file %s', $destinationFilename)
+                sprintf('Could not write to file %s', $webrootFilename)
             );
         }
 

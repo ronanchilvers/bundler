@@ -5,3 +5,5 @@ build/
 dest/
 source/
 test.php
+bundler.yaml
+bundler.manifest.cache

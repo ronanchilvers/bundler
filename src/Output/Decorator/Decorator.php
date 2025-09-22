@@ -23,7 +23,7 @@ abstract class Decorator implements FormatterInterface
     /**
      * @param array<int,mixed> $paths
      */
-    public function render(Bundle $bundle): string
+    public function render(Bundle $bundle): Bundle
     {
         $bundle = $this->modifyPaths($bundle);
 
