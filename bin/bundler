@@ -1,6 +1,5 @@
 #!/bin/env php
 <?php
-
 /**
  * Bundler CLI tool
  * mode: php
@@ -17,7 +16,10 @@ use Ronanchilvers\Bundler\Manifest;
 use Ronanchilvers\Bundler\Watcher\File;
 
 $baseDir = null;
-foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
+foreach (
+    [__DIR__ . "/../../../autoload.php", __DIR__ . "/../vendor/autoload.php"]
+    as $file
+) {
     if (file_exists($file)) {
         $file = realpath($file);
         $baseDir = dirname(dirname($file));
@@ -28,32 +30,36 @@ foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php
 
 function build(string $filename, string $manifestFilename)
 {
-    Cli::info($filename . ' - starting build');
+    Cli::info($filename . " - starting build");
     $builder = Builder::fromYamlFile($filename);
     $manifest = new Manifest();
     foreach ($builder->bundles() as $name => $bundle) {
-        ['formatter' => $formatter, 'bundle' => $bundle] = $bundle;
+        ["formatter" => $formatter, "bundle" => $bundle] = $bundle;
         $bundle = $formatter->render($bundle);
         $manifest->add($name, $bundle);
     }
 
     $manifest->store($manifestFilename);
-    Cli::info($filename . ' - build complete');
+    Cli::info($filename . " - build complete");
 }
 
 // Handle CLI options
 $specs = new OptionCollection();
-$specs->add('c|config:', 'Bundler configuration file')
-    ->isa('String')
-    ->defaultValue($baseDir . '/bundler.yaml');
-$specs->add('m|manifest:', 'Manifest cache file')
-    ->isa('String')
-    ->defaultValue($baseDir . '/bundler.manifest.cache');
-$specs->add('watch', 'Watch the bundler config and rebuild when it changes')
-    ->isa('bool')
+$specs
+    ->add("c|config:", "Bundler configuration file")
+    ->isa("String")
+    ->defaultValue($baseDir . "/bundler.yaml");
+$specs
+    ->add("m|manifest:", "Manifest cache file")
+    ->isa("String")
+    ->defaultValue($baseDir . "/bundler.manifest.cache");
+$specs
+    ->add("watch", "Watch the bundler config and rebuild when it changes")
+    ->isa("bool")
     ->defaultValue(false);
-$specs->add('h|help', 'Print this help message')
-    ->isa('bool')
+$specs
+    ->add("h|help", "Print this help message")
+    ->isa("bool")
     ->defaultValue(false);
 
 try {
@@ -62,20 +68,20 @@ try {
 
     $configFilename = $result->keys["config"]->value;
     $manifestFilename = $result->keys["manifest"]->value;
-    $watcher = new File($configFilename);
 
     switch (true) {
         case true == $result->keys["help"]->value:
             $printer = new ConsoleOptionPrinter();
-            echo sprintf(
-                "Usage: %s",
-                $argv[0],
-            ) . PHP_EOL;
+            echo sprintf("Usage: %s", $argv[0]) . PHP_EOL;
             echo $printer->render($specs);
             break;
         case true == $result->keys["watch"]->value:
-            Cli::info($configFilename . ' - starting watch');
-            $watcher->start(function (string $filename) use ($manifestFilename) {
+            Cli::info($configFilename . " - starting watch");
+            $watcher = new File();
+            $watcher->addFile($configFilename);
+            $watcher->start(function (string $filename) use (
+                $manifestFilename,
+            ) {
                 build($filename, $manifestFilename);
             });
             break;
@@ -88,3 +94,4 @@ try {
     exit(1);
 }
 exit(0);
+

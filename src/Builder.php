@@ -17,43 +17,44 @@ class Builder
         $settings = Yaml::parseFile($yamlFile);
 
         $dirname = realpath(dirname($yamlFile));
-        $globalSettings = array_map(function ($item) use ($dirname) {
-            if (!is_string($item)) {
-                return $item;
-            }
-            if (false === stripos($item, '__DIR__')) {
-                return $item;
-            }
-            $path = str_replace('__DIR__', $dirname, $item);
-            if (!is_dir($path)) {
-                throw new \InvalidArgumentException(
-                    'Path does not exist: ' . $path
-                );
-            }
+        $globalSettings = array_map(
+            function ($item) use ($dirname) {
+                if (!is_string($item)) {
+                    return $item;
+                }
+                if (false === stripos($item, "__DIR__")) {
+                    return $item;
+                }
+                $path = str_replace("__DIR__", $dirname, $item);
+                if (!is_dir($path)) {
+                    throw new \InvalidArgumentException(
+                        "Path does not exist: " . $path,
+                    );
+                }
 
-            return realpath($path);
-        }, $settings['globals'] ?: []);
-        $globalDecorators = @$settings['decorators'] ?: [];
+                return realpath($path);
+            },
+            $settings["globals"] ?: [],
+        );
+        $globalDecorators = @$settings["decorators"] ?: [];
 
-        foreach ($settings['bundles'] as $name => $bundle) {
+        foreach ($settings["bundles"] as $name => $bundle) {
             $decorators = array_merge(
                 $globalDecorators,
-                @$bundle['decorators'] ?: []
+                @$bundle["decorators"] ?: [],
             );
-            if (!isset($bundle['formatter'])) {
+            if (!isset($bundle["formatter"])) {
                 throw new \InvalidArgumentException(
-                    'No formatter specified for bundle \'' . $name . '\''
+                    'No formatter specified for bundle \'' . $name . '\'',
                 );
             }
-            $formatter = Formatter::factory($bundle['formatter']);
+            $formatter = Formatter::factory($bundle["formatter"]);
             foreach ($decorators as $class => $settings) {
-                $config = array_merge(
-                    $globalSettings,
-                    $settings ?: []
-                );
+                $config = array_merge($globalSettings, $settings ?: []);
                 $formatter = $formatter->decorate($class, $config);
             }
-            $pathBundle = (new Bundle())->addMany($bundle['paths']);
+            $pathBundle = new Bundle();
+            $pathBundle->addMany($bundle["paths"]);
             $instance->addBundle($name, $formatter, $pathBundle);
         }
 
@@ -62,9 +63,7 @@ class Builder
 
     protected $bundles = [];
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function addBundle(
         string $name,
@@ -72,8 +71,8 @@ class Builder
         Bundle $bundle,
     ): static {
         $this->bundles[$name] = [
-            'formatter' => $formatter,tch
-            'bundle' => $bundle,
+            "formatter" => $formatter,
+            "bundle" => $bundle,
         ];
 
         return $this;
