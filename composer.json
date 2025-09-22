@@ -3,6 +3,7 @@
     "description": "Simple file bundler",
     "type": "library",
     "require": {
+        "corneltek/getoptionkit": "^2.7",
         "symfony/yaml": "^7.3"
     },
     "require-dev": {

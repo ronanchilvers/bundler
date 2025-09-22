@@ -6,11 +6,62 @@
  * mode: php
  */
 
-// use Ronanchilvers\Bundler\Bundler;
+declare(strict_types=1);
 
+use GetOptionKit\OptionCollection;
+use GetOptionKit\OptionParser;
+use GetOptionKit\OptionPrinter\ConsoleOptionPrinter;
+use Ronanchilvers\Bundler\Builder;
+use Ronanchilvers\Bundler\Cli;
+use Ronanchilvers\Bundler\Manifest;
+use Ronanchilvers\Bundler\Watcher\File;
+
+$baseDir = null;
 foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
+        $file = realpath($file);
+        $baseDir = dirname(dirname($file));
         require $file;
         break;
     }
 }
+
+function build(string $filename, string $manifestFilename)
+{
+    Cli::info($filename . ' - starting build');
+    $builder = Builder::fromYamlFile($filename);
+    $manifest = new Manifest();
+    foreach ($builder->bundles() as $name => $bundle) {
+        ['formatter' => $formatter, 'bundle' => $bundle] = $bundle;
+        $bundle = $formatter->render($bundle);
+        $manifest->add($name, $bundle);
+    }
+
+    $manifest->store($manifestFilename);
+    Cli::info($filename . ' - build complete');
+}
+
+// Handle CLI options
+$specs = new OptionCollection();
+$specs->add('c|config:', 'Bundler configuration file')
+    ->isa('String')
+    ->defaultValue($baseDir . '/bundler.yaml');
+$specs->add('m|manifest:', 'Manifest cache file')
+    ->isa('String')
+    ->defaultValue($baseDir . '/bundler.manifest.cache');
+
+try {
+    $parser = new OptionParser($specs);
+    $result = $parser->parse($argv);
+
+    $manifestFilename = $result->keys["manifest"]->value;
+    $watcher = new File($result->keys["config"]->value);
+
+    $watcher->start(function (string $filename) use ($manifestFilename) {
+        build($filename, $manifestFilename);
+    });
+} catch (Exception $e) {
+    Cli::error($e->getMessage());
+    exit(1);
+}
+exit(0);

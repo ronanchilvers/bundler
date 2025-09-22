@@ -24,10 +24,15 @@ class Builder
             if (false === stripos($item, '__DIR__')) {
                 return $item;
             }
+            $path = str_replace('__DIR__', $dirname, $item);
+            if (!is_dir($path)) {
+                throw new \InvalidArgumentException(
+                    'Path does not exist: ' . $path
+                );
+            }
 
-            return realpath(str_replace('__DIR__', $dirname, $item));
+            return realpath($path);
         }, $settings['globals'] ?: []);
-
         $globalDecorators = @$settings['decorators'] ?: [];
 
         foreach ($settings['bundles'] as $name => $bundle) {
