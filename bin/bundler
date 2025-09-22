@@ -52,6 +52,9 @@ $specs->add('m|manifest:', 'Manifest cache file')
 $specs->add('watch', 'Watch the bundler config and rebuild when it changes')
     ->isa('bool')
     ->defaultValue(false);
+$specs->add('h|help', 'Print this help message')
+    ->isa('bool')
+    ->defaultValue(false);
 
 try {
     $parser = new OptionParser($specs);
@@ -62,6 +65,14 @@ try {
     $watcher = new File($configFilename);
 
     switch (true) {
+        case true == $result->keys["help"]->value:
+            $printer = new ConsoleOptionPrinter();
+            echo sprintf(
+                "Usage: %s",
+                $argv[0],
+            ) . PHP_EOL;
+            echo $printer->render($specs);
+            break;
         case true == $result->keys["watch"]->value:
             Cli::info($configFilename . ' - starting watch');
             $watcher->start(function (string $filename) use ($manifestFilename) {
