@@ -49,17 +49,29 @@ $specs->add('c|config:', 'Bundler configuration file')
 $specs->add('m|manifest:', 'Manifest cache file')
     ->isa('String')
     ->defaultValue($baseDir . '/bundler.manifest.cache');
+$specs->add('watch', 'Watch the bundler config and rebuild when it changes')
+    ->isa('bool')
+    ->defaultValue(false);
 
 try {
     $parser = new OptionParser($specs);
     $result = $parser->parse($argv);
 
+    $configFilename = $result->keys["config"]->value;
     $manifestFilename = $result->keys["manifest"]->value;
-    $watcher = new File($result->keys["config"]->value);
+    $watcher = new File($configFilename);
 
-    $watcher->start(function (string $filename) use ($manifestFilename) {
-        build($filename, $manifestFilename);
-    });
+    switch (true) {
+        case true == $result->keys["watch"]->value:
+            Cli::info($configFilename . ' - starting watch');
+            $watcher->start(function (string $filename) use ($manifestFilename) {
+                build($filename, $manifestFilename);
+            });
+            break;
+        default:
+            build($configFilename, $manifestFilename);
+            break;
+    }
 } catch (Exception $e) {
     Cli::error($e->getMessage());
     exit(1);
