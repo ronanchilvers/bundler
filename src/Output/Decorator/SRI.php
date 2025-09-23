@@ -21,13 +21,9 @@ class SRI extends Decorator
             );
         }
         foreach ($bundle as $path) {
-            $sourcePath = $this->joinPaths(
-                $source,
-                $path,
-            );
-            if (!file_exists($sourcePath)) {
+            if (!file_exists($path)) {
                 throw new \RuntimeException(
-                    sprintf('Source file %s does not exist', $sourcePath)
+                    sprintf('Source file %s does not exist', $path)
                 );
             }
             $algorithms = $this->getConfig('algorithms', ['sha384']);
@@ -37,7 +33,7 @@ class SRI extends Decorator
 
             $hashes = [];
             foreach ($algorithms as $algorithm) {
-                $hash = base64_encode(hash_file($algorithm, $sourcePath, true));
+                $hash = base64_encode(hash_file($algorithm, $path, true));
                 $hashes[] = sprintf('%s-%s', $algorithm, $hash);
             }
             $bundle->setAttribute(

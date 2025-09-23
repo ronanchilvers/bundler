@@ -27,10 +27,7 @@ class Builder
                 if (!is_string($item)) {
                     return $item;
                 }
-                if (false === stripos($item, "__DIR__")) {
-                    return $item;
-                }
-                $path = str_replace("__DIR__", $dirname, $item);
+                $path = Path::placeholders($item);
                 if (!is_dir($path)) {
                     throw new \InvalidArgumentException(
                         "Path does not exist: " . $path,
@@ -42,41 +39,34 @@ class Builder
             $settings["globals"] ?: [],
         );
         $globalDecorators = @$settings["decorators"] ?: [];
-
-        foreach ($settings["bundles"] as $name => $bundleDef) {
+        foreach ($settings["bundles"] as $name => $bundleDefinition) {
             $events?->emit(EventNames::CONFIG_BUNDLE_START, [
                 $name,
-                $bundleDef,
+                $bundleDefinition,
             ]);
             $decorators = array_merge(
                 $globalDecorators,
-                @$bundleDef["decorators"] ?: [],
+                @$bundleDefinition["decorators"] ?: [],
             );
-            if (!isset($bundleDef["formatter"])) {
+            if (!isset($bundleDefinition["formatter"])) {
                 throw new \InvalidArgumentException(
                     'No formatter specified for bundle \'' . $name . '\'',
                 );
             }
-            $formatter = Formatter::factory($bundleDef["formatter"]);
+            $formatter = Formatter::factory($bundleDefinition["formatter"]);
             foreach ($decorators as $class => $dSettings) {
                 $config = array_merge($globalSettings, $dSettings ?: []);
                 $formatter = $formatter->decorate($class, $config);
             }
-            $pathBundle = new Bundle([], $name);
-            foreach ($bundleDef["paths"] as $p) {
+            $pathBundle = new Bundle(
+                events: $events,
+            );
+            foreach ($bundleDefinition["paths"] as $p) {
                 $realPath = realpath($globalSettings['source'] . DIRECTORY_SEPARATOR . $p);
                 if (!file_exists($realPath)) {
                     throw new RuntimeException("Path does not exist - " . $p);
                 }
-                $events?->emit(EventNames::CONFIG_FILE_ADDING, [
-                    $realPath,
-                    $p
-                ]);
-                $pathBundle->add($p);
-                $events?->emit(EventNames::CONFIG_FILE_ADDED, [
-                    $realPath,
-                    $p
-                ]);
+                $pathBundle->add($realPath);
             }
             $instance->addBundle($name, $formatter, $pathBundle);
             $events?->emit(EventNames::CONFIG_BUNDLE_END, [

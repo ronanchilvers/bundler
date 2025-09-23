@@ -3,7 +3,7 @@ build/
 *.log
 .phpunit.cache
 dest/
-source/
+resources/
 test.php
 bundler.yaml
 bundler.manifest.cache

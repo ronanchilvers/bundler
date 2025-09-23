@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ronanchilvers\Bundler;
 
 use Ronanchilvers\Bundler\Events\Dispatcher;
-use Ronanchilvers\Bundler\Events\Event;
 use Ronanchilvers\Bundler\Events\EventNames;
 use Ronanchilvers\Bundler\Path\Bundle;
 use Ronanchilvers\Bundler\Output\FormatterInterface;

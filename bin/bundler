@@ -15,7 +15,6 @@ use Ronanchilvers\Bundler\Builder;
 use Ronanchilvers\Bundler\Cli;
 use Ronanchilvers\Bundler\Events\Dispatcher;
 use Ronanchilvers\Bundler\Events\EventNames;
-use Ronanchilvers\Bundler\Manifest;
 use Ronanchilvers\Bundler\Processor;
 use Ronanchilvers\Bundler\Watcher\File;
 

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler\Path;
 
+use Ronanchilvers\Bundler\Events\Dispatcher;
+use Ronanchilvers\Bundler\Events\EventNames;
+
 /**
  * @implements \ArrayAccess<int,string>
  * @implements \IteratorAggregate<int,string>
@@ -11,31 +14,40 @@ namespace Ronanchilvers\Bundler\Path;
 class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     protected array $paths = [];
-    protected ?string $bundleName = null;
+    protected ?string $name = null;
+    protected ?Dispatcher $events = null;
 
     /**
      * @param array<int,string> $paths Initial path list (optional)
-     * @param string|null $bundleName  Logical bundle name for events
+     * @param string|null $name  Logical bundle name for events
      */
     public function __construct(
         array $paths = [],
-        ?string $bundleName = null,
+        ?string $name = null,
+        ?Dispatcher $events = null,
     ) {
-        $this->bundleName = $bundleName;
+        $this->name = $name;
+        $this->events = $events;
         $this->addMany($paths);
     }
 
-    public function setBundleName(?string $name): self
+    public function setName(?string $name): self
     {
-        $this->bundleName = $name;
+        $this->name = $name;
         return $this;
     }
 
     public function add(string $path): static
     {
+        $this->events?->emit(EventNames::CONFIG_FILE_ADDING, [
+            $path,
+        ]);
         $this->paths[$path] = [
             "path" => $path,
         ];
+        $this->events?->emit(EventNames::CONFIG_FILE_ADDED, [
+            $path,
+        ]);
 
         return $this;
     }
@@ -43,11 +55,21 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @param array<int,mixed> $paths
      */
-    public function addMany(array $paths): Bundle
+    public function addMany(array $paths): static
     {
         foreach ($paths as $path) {
             $this->add($path);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function clear(): static
+    {
+        $this->paths = [];
 
         return $this;
     }

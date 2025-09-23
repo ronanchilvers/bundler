@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ronanchilvers\Bundler\Output\Decorator;
 
 use Ronanchilvers\Bundler\Output\Traits\FileTrait;
+use Ronanchilvers\Bundler\Path;
 use Ronanchilvers\Bundler\Path\Bundle;
 
 class Concatenate extends Decorator
@@ -13,11 +14,11 @@ class Concatenate extends Decorator
 
     protected function modifyPaths(Bundle $paths): Bundle
     {
-        $source = rtrim($this->getConfig('source'), DIRECTORY_SEPARATOR);
-        $webroot = rtrim($this->getConfig('webroot'), DIRECTORY_SEPARATOR);
-        if (!is_dir($webroot)) {
+        $source = Path::placeholders(rtrim($this->getConfig('source'), DIRECTORY_SEPARATOR));
+        $destination = Path::placeholders(rtrim($this->getConfig('destination'), DIRECTORY_SEPARATOR));
+        if (!is_dir($destination)) {
             throw new \RuntimeException(
-                sprintf('Destination %s is not a valid directory', $webroot)
+                sprintf('Destination %s is not a valid directory', $destination)
             );
         }
         $content = [];
@@ -26,17 +27,13 @@ class Concatenate extends Decorator
             if (is_null($extension)) {
                 $extension = $extension ?: pathinfo((string) $path, PATHINFO_EXTENSION);
             }
-            $sourcePath = $this->joinPaths(
-                $source,
-                $path,
-            );
-            if (!file_exists($sourcePath)) {
+            if (!file_exists($path)) {
                 throw new \RuntimeException(
-                    sprintf('Source file %s does not exist', $sourcePath)
+                    sprintf('Source file %s does not exist', $path)
                 );
             }
             $content[] = file_get_contents(
-                filename: $sourcePath,
+                filename: $path,
             );
         }
         $content = implode("\n", $content);
@@ -50,20 +47,16 @@ class Concatenate extends Decorator
             $hash,
             $extension,
         );
-        $webrootFilename = $this->joinPaths($webroot, $filename);
-        if (!$this->writeFile($webrootFilename, $content)) {
+        $destinationFilename = $this->joinPaths($destination, $filename);
+        if (!$this->writeFile($destinationFilename, $content)) {
             throw new \RuntimeException(
-                sprintf('Could not write to file %s', $webrootFilename)
+                sprintf('Could not write to file %s', $destinationFilename)
             );
         }
 
-        $path = sprintf(
-            '%s%s%s',
-            $this->getConfig('web_path'),
-            DIRECTORY_SEPARATOR,
-            $filename
-        );
+        $bundle = clone $paths;
+        $bundle->clear();
 
-        return new Bundle([ $path ]);
+        return $bundle->add($destinationFilename);
     }
 }

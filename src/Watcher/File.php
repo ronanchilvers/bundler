@@ -114,6 +114,10 @@ class File
         while ($this->running) {
             clearstatcache();
             foreach ($this->files as $filename => $previousMtime) {
+                if (!file_exists($filename)) {
+                    // File has disappeared; treat as a "change"
+                    continue;
+                }
                 $currentMtime = file_exists($filename) ? filemtime($filename) : false;
                 if ($currentMtime === false) {
                     // Treat disappearance or unreadable file as a "change"
