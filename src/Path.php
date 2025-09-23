@@ -37,8 +37,8 @@ class Path
     public function __construct(string $realpath, string $path)
     {
         $this->data = [
-        'realpath' => $realpath,
-        'path' => $path,
+            'realpath' => $realpath,
+            'path' => $path,
         ];
     }
 
