@@ -13,7 +13,7 @@ class Cli
 
     private static $level = 2;
 
-    public static function setLevel(int $level)
+    public static function setLevel(int $level): void
     {
         static::$level = $level;
     }
