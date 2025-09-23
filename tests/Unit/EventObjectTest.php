@@ -39,7 +39,7 @@ final class EventObjectTest extends TestCase
             $finalFoo   = $event->get('foo');
         });
 
-        $dispatcher->dispatch(new Event('custom.evt', ['foo' => 'bar']));
+        $dispatcher->emit('custom.evt', ['bar']));
 
         $this->assertSame(['listener1', 'listener2'], $sequence);
         $this->assertSame('baz', $finalFoo, 'Second listener should observe mutated value');
@@ -63,7 +63,7 @@ final class EventObjectTest extends TestCase
             $order[] = 'third-should-not-run';
         });
 
-        $dispatcher->dispatch(new Event('stop.test'));
+        $dispatcher->emit('stop.test'));
 
         $this->assertSame(['first', 'second'], $order);
         $this->assertNotContains('third-should-not-run', $order);

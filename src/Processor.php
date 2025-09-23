@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler;
@@ -38,10 +39,8 @@ class Processor
      * @param Manifest|null $manifest  Optional existing Manifest to append to
      * @param bool          $rethrow   Whether to rethrow exceptions after
      *                                 emitting the error event
-     *
-     * @throws \Throwable Re-throws bundle processing exceptions if $rethrow=true
      */
-    public function run(Builder $builder, ?Manifest $manifest = null, bool $rethrow = true): Manifest
+    public function run(Builder $builder, ?Manifest $manifest = null): Manifest
     {
         $manifest = $manifest ?? new Manifest();
 
@@ -52,45 +51,42 @@ class Processor
             $bundle = $data['bundle'];
 
             // Emit BEFORE event
-            $this->events->dispatch(new Event(
+            $this->events->emit(
                 EventNames::BUNDLE_PROCESS_BEFORE,
                 [
-                    'name'      => $name,
-                    'bundle'    => $bundle,
-                    'formatter' => $formatter,
+                    $name,
+                    $bundle,
+                    $formatter,
                 ]
-            ));
+            );
 
             try {
                 $rendered = $formatter->render($bundle);
 
                 // Emit AFTER event (with rendered bundle)
-                $this->events->dispatch(new Event(
+                $this->events->emit(
                     EventNames::BUNDLE_PROCESS_AFTER,
                     [
-                        'name'      => $name,
-                        'bundle'    => $rendered,
-                        'formatter' => $formatter,
+                        $name,
+                        $rendered,
+                        $formatter,
                     ]
-                ));
+                );
 
                 $manifest->add($name, $rendered);
             } catch (\Throwable $e) {
                 // Emit ERROR event
-                $this->events->dispatch(new Event(
+                $this->events->emit(
                     EventNames::BUNDLE_PROCESS_ERROR,
                     [
-                        'name'     => $name,
-                        'bundle'   => $bundle,
-                        'formatter'=> $formatter,
-                        'error'    => $e,
+                        $name,
+                        $bundle,
+                        $formatter,
+                        $e,
                     ]
-                ));
+                );
 
-                if ($rethrow) {
-                    throw $e;
-                }
-                // Otherwise continue to next bundle
+                throw $e;
             }
         }
 

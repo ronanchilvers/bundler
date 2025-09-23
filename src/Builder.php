@@ -9,6 +9,7 @@ use Ronanchilvers\Bundler\Output\FormatterInterface;
 use Ronanchilvers\Bundler\Path\Bundle;
 use Ronanchilvers\Bundler\Events\Dispatcher;
 use Ronanchilvers\Bundler\Events\EventNames;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 
 class Builder
@@ -44,8 +45,8 @@ class Builder
 
         foreach ($settings["bundles"] as $name => $bundleDef) {
             $events?->emit(EventNames::CONFIG_BUNDLE_START, [
-                "name" => $name,
-                "config" => $bundleDef,
+                $name,
+                $bundleDef,
             ]);
             $decorators = array_merge(
                 $globalDecorators,
@@ -61,15 +62,27 @@ class Builder
                 $config = array_merge($globalSettings, $dSettings ?: []);
                 $formatter = $formatter->decorate($class, $config);
             }
-            $pathBundle = new Bundle([], $events, $name);
+            $pathBundle = new Bundle([], $name);
             foreach ($bundleDef["paths"] as $p) {
+                $realPath = realpath($globalSettings['source'] . DIRECTORY_SEPARATOR . $p);
+                if (!file_exists($realPath)) {
+                    throw new RuntimeException("Path does not exist - " . $p);
+                }
+                $events?->emit(EventNames::CONFIG_FILE_ADDING, [
+                    $realPath,
+                    $p
+                ]);
                 $pathBundle->add($p);
+                $events?->emit(EventNames::CONFIG_FILE_ADDED, [
+                    $realPath,
+                    $p
+                ]);
             }
             $instance->addBundle($name, $formatter, $pathBundle);
             $events?->emit(EventNames::CONFIG_BUNDLE_END, [
-                "name" => $name,
-                "bundle" => $pathBundle,
-                "formatter" => $formatter,
+                $name,
+                $pathBundle,
+                $formatter,
             ]);
         }
 
@@ -78,7 +91,9 @@ class Builder
 
     protected $bundles = [];
 
-    public function __construct(protected ?Dispatcher $events = null) {}
+    public function __construct(protected ?Dispatcher $events = null)
+    {
+    }
 
     public function addBundle(
         string $name,

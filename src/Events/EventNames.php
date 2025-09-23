@@ -7,21 +7,28 @@ namespace Ronanchilvers\Bundler\Events;
 /**
  * Centralised list of event name constants used throughout the Bundler.
  *
- * Grouped by functional area:
- *
+ * GROUPS
+ * ======
  * Configuration / bundle definition lifecycle:
- *  - CONFIG_BUNDLE_START   : Emitted before a bundle definition from YAML is processed
- *  - CONFIG_BUNDLE_END     : Emitted after a bundle definition has been fully constructed
- *  - CONFIG_FILE_ADDING    : Emitted before a file path is added to a Bundle (cancellable / mutable)
- *  - CONFIG_FILE_ADDED     : Emitted after a file path has been added to a Bundle
+ *  - CONFIG_BUNDLE_START    : Before a bundle stanza from YAML is processed
+ *  - CONFIG_BUNDLE_END      : After a bundle has been fully constructed
+ *  - CONFIG_FILE_ADDING     : Before a file path is added to a Bundle (cancellable / mutable)
+ *  - CONFIG_FILE_ADDED      : After a file path has been added to a Bundle
  *
- * Processing lifecycle (execution / rendering):
- *  - BUNDLE_PROCESS_BEFORE : Emitted immediately before a bundle is rendered by its formatter
- *  - BUNDLE_PROCESS_AFTER  : Emitted after successful rendering
- *  - BUNDLE_PROCESS_ERROR  : Emitted if an exception occurs during processing
+ * Processing (rendering) lifecycle:
+ *  - BUNDLE_PROCESS_BEFORE  : Immediately before a bundle is rendered by its formatter
+ *  - BUNDLE_PROCESS_AFTER   : After successful rendering
+ *  - BUNDLE_PROCESS_ERROR   : An exception occurred during rendering (error in payload)
  *
- * These constants are intended to avoid typos in event names and provide a
- * single place to discover available events.
+ * File watcher lifecycle:
+ *  - WATCHER_START          : Watcher loop about to begin
+ *  - WATCHER_STOP           : Watcher loop is terminating (graceful stop)
+ *  - WATCHER_FILE_MODIFIED  : A watched file's mtime changed
+ *
+ * RATIONALE
+ * =========
+ * Using constants avoids typo-prone string literals throughout the codebase
+ * and provides a discoverable catalogue of supported events.
  */
 final class EventNames
 {
@@ -36,8 +43,8 @@ final class EventNames
     public const BUNDLE_PROCESS_AFTER  = 'bundle.process.after';
     public const BUNDLE_PROCESS_ERROR  = 'bundle.process.error';
 
-    // Watcher
+    // Watcher / file system events
     public const WATCHER_START         = 'watcher.start';
-    public const WATCHER_WAKE          = 'watcher.wake';
-    public const WATCHER_END           = 'watcher.end';
+    public const WATCHER_STOP          = 'watcher.stop';
+    public const WATCHER_FILE_MODIFIED = 'watcher.file.modified';
 }

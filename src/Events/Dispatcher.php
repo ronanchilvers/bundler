@@ -25,8 +25,7 @@ final class Dispatcher
      * Register a listener for an event name.
      *
      * Listener signature options:
-     *  - function (Event $event): void
-     *  - function (...$args): void   (legacy emit style; receives expanded payload values)
+     *  - function (...$args): void
      */
     public function on(string $eventName, callable $listener): self
     {
@@ -76,38 +75,9 @@ final class Dispatcher
      */
     public function emit(string $eventName, array $payload = []): void
     {
-        // We create an Event whose payload is keyed numerically so that
-        // dispatch() can still give the full Event object to modern listeners.
-        $event = new Event($eventName, $payload);
-        $this->dispatch($event);
-    }
-
-    /**
-     * Dispatch an Event object to all listeners registered for its name.
-     * Propagation stops if a listener calls $event->stop().
-     */
-    public function dispatch(Event $event): Event
-    {
-        foreach ($this->listeners($event->name()) as $listener) {
-            // Heuristic: if listener expects 1 parameter we pass Event;
-            // otherwise we expand numeric payload values (legacy style).
-            $ref = is_array($listener)
-                ? new \ReflectionMethod($listener[0], $listener[1])
-                : (is_object($listener) && !$listener instanceof \Closure
-                    ? new \ReflectionMethod($listener, "__invoke")
-                    : new \ReflectionFunction($listener));
-
-            if ($ref->getNumberOfParameters() === 1) {
-                $listener($event);
-            } else {
-                $listener(...$event->payload());
-            }
-
-            if ($event->isStopped()) {
-                break;
-            }
+        foreach ($this->listeners($eventName) as $listener) {
+            $listener(...$payload);
         }
-        return $event;
     }
 
     /**

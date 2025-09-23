@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler\Path;
 
-use Ronanchilvers\Bundler\Events\Dispatcher;
-use Ronanchilvers\Bundler\Events\EventNames;
-use Ronanchilvers\Bundler\Events\FileAddingEvent;
-
 /**
  * @implements \ArrayAccess<int,string>
  * @implements \IteratorAggregate<int,string>
@@ -15,20 +11,16 @@ use Ronanchilvers\Bundler\Events\FileAddingEvent;
 class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     protected array $paths = [];
-    protected ?Dispatcher $events = null;
     protected ?string $bundleName = null;
 
     /**
      * @param array<int,string> $paths Initial path list (optional)
-     * @param Dispatcher|null $events  Optional event dispatcher
      * @param string|null $bundleName  Logical bundle name for events
      */
     public function __construct(
         array $paths = [],
-        ?Dispatcher $events = null,
         ?string $bundleName = null,
     ) {
-        $this->events = $events;
         $this->bundleName = $bundleName;
         $this->addMany($paths);
     }
@@ -41,28 +33,9 @@ class Bundle implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function add(string $path): static
     {
-        if ($this->events) {
-            $event = new FileAddingEvent(EventNames::CONFIG_FILE_ADDING, [
-                "bundle" => $this->bundleName,
-                "path" => $path,
-            ]);
-            $this->events->dispatch($event);
-            if ($event->isStopped()) {
-                return $this; // cancelled
-            }
-            $path = $event->getPath();
-        }
-
         $this->paths[$path] = [
             "path" => $path,
         ];
-
-        if ($this->events) {
-            $this->events->emit(EventNames::CONFIG_FILE_ADDED, [
-                "bundle" => $this->bundleName,
-                "path" => $path,
-            ]);
-        }
 
         return $this;
     }
