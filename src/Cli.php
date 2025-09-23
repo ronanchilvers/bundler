@@ -45,9 +45,9 @@ class Cli
         }
         $timestamp = date("Y-m-d H:i:s");
         $prefix = match ($level) {
-            self::LEVEL_DEBUG => "{$timestamp} DEBUG",
-            self::LEVEL_INFO => "\033[32m{$timestamp} INFO\033[0m",
-            self::LEVEL_NOTICE => "\033[34m{$timestamp} NOTICE\033[0m",
+            self::LEVEL_DEBUG => "\033[33m{$timestamp} DEBUG\033[0m",
+            self::LEVEL_INFO => "\033[34m{$timestamp} INFO\033[0m",
+            self::LEVEL_NOTICE => "\033[32m{$timestamp} NOTICE\033[0m",
             self::LEVEL_ERROR => "\033[31m{$timestamp} ERROR\033[0m",
             default => "",
         };

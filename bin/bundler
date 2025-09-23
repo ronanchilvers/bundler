@@ -21,7 +21,7 @@ use Ronanchilvers\Bundler\Watcher\File;
 $baseDir = null;
 foreach (
     [__DIR__ . "/../../../autoload.php", __DIR__ . "/../vendor/autoload.php"]
- as $file
+    as $file
 ) {
     if (file_exists($file)) {
         $file = realpath($file);
@@ -36,6 +36,7 @@ function build(
     string $manifestFilename,
     ?Dispatcher $events
 ) {
+    Cli::notice("Processing files");
     $builder = Builder::fromYamlFile(
         $filename,
         $events
@@ -60,22 +61,37 @@ $specs
     ->isa("bool")
     ->defaultValue(false);
 $specs
+    ->add("v|verbose", "Verbose output")
+    ->isa("bool")
+    ->defaultValue(false);
+$specs
+    ->add("d|debug", "Debugging output")
+    ->isa("bool")
+    ->defaultValue(false);
+$specs
     ->add("h|help", "Print this help message")
     ->isa("bool")
     ->defaultValue(false);
-
-// Set output level
-Cli::setLevel(Cli::LEVEL_INFO);
 
 try {
     $parser = new OptionParser($specs);
     $result = $parser->parse($argv);
 
+    // Set output level
+    $level = Cli::LEVEL_NOTICE;
+    if ($result->keys['verbose']->value) {
+        $level = Cli::LEVEL_INFO;
+    }
+    if ($result->keys['debug']->value) {
+        $level = Cli::LEVEL_DEBUG;
+    }
+    Cli::setLevel($level);
+
     $configFilename = $result->keys["config"]->value;
     $manifestFilename = $result->keys["manifest"]->value;
     $events = new Dispatcher();
     $events->on(EventNames::WATCHER_START, function ($watcher) {
-        Cli::info("Watcher started");
+        Cli::debug("Watcher started");
     });
     $events->on(EventNames::BUNDLE_PROCESS_BEFORE, function ($name, $bundle, $formatter) {
         Cli::debug("Formatter - " . $formatter::class);
@@ -91,7 +107,7 @@ try {
             Cli::info($configFilename . " - starting watch");
             $watcher = new File($events);
             $events->on(EventNames::CONFIG_FILE_ADDED, function ($filename) use ($watcher) {
-                Cli::info("Adding file watch - {$filename}");
+                Cli::debug("Adding file watch - {$filename}");
                 $watcher->addFile($filename);
             });
             $watcher->addFile($configFilename);
@@ -101,7 +117,7 @@ try {
                 $manifestFilename,
                 $events,
             ) {
-                Cli::info("Change detected - " . $filename);
+                Cli::debug("Change detected - " . $filename);
                 build($configFilename, $manifestFilename, $events);
             });
             break;
