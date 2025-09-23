@@ -6,10 +6,17 @@ namespace Ronanchilvers\Bundler;
 
 class Cli
 {
-    private const LEVEL_DEBUG = "debug";
-    private const LEVEL_INFO = "info";
-    private const LEVEL_NOTICE = "notice";
-    private const LEVEL_ERROR = "error";
+    public const LEVEL_DEBUG = 8;
+    public const LEVEL_INFO = 4;
+    public const LEVEL_NOTICE = 2;
+    public const LEVEL_ERROR = 1;
+
+    private static $level = 2;
+
+    public static function setLevel(int $level)
+    {
+        static::$level = $level;
+    }
 
     public static function debug(string $message): void
     {
@@ -31,8 +38,11 @@ class Cli
         static::write(self::LEVEL_ERROR, $message);
     }
 
-    protected static function write(string $level, string $message): void
+    protected static function write(int $level, string $message): void
     {
+        if ($level > static::$level) {
+            return;
+        }
         $timestamp = date("Y-m-d H:i:s");
         $prefix = match ($level) {
             self::LEVEL_DEBUG => "{$timestamp} DEBUG",

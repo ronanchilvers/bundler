@@ -64,6 +64,9 @@ $specs
     ->isa("bool")
     ->defaultValue(false);
 
+// Set output level
+Cli::setLevel(Cli::LEVEL_INFO);
+
 try {
     $parser = new OptionParser($specs);
     $result = $parser->parse($argv);
