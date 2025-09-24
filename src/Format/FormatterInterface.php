@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output;
+namespace Ronanchilvers\Bundler\Format;
 
 use Ronanchilvers\Bundler\Path\Bundle;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Decorator;
+namespace Ronanchilvers\Bundler\Format\Decorator;
 
-use Ronanchilvers\Bundler\Output\Decorator\Decorator;
-use Ronanchilvers\Bundler\Output\Traits\FileTrait;
+use Ronanchilvers\Bundler\Format\Decorator\Decorator;
+use Ronanchilvers\Bundler\Format\Traits\FileTrait;
 use Ronanchilvers\Bundler\Path\Bundle;
 
 class SRI extends Decorator

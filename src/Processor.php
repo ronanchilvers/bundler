@@ -7,7 +7,7 @@ namespace Ronanchilvers\Bundler;
 use Ronanchilvers\Bundler\Events\Dispatcher;
 use Ronanchilvers\Bundler\Events\EventNames;
 use Ronanchilvers\Bundler\Path\Bundle;
-use Ronanchilvers\Bundler\Output\FormatterInterface;
+use Ronanchilvers\Bundler\Format\FormatterInterface;
 
 /**
  * Orchestrates the processing (rendering) of bundles produced by Builder.
@@ -21,7 +21,7 @@ use Ronanchilvers\Bundler\Output\FormatterInterface;
  * Event payload keys:
  *  - name       : string                (logical bundle name)
  *  - bundle     : Ronanchilvers\Bundler\Path\Bundle (current / rendered bundle)
- *  - formatter  : Ronanchilvers\Bundler\Output\FormatterInterface
+ *  - formatter  : Ronanchilvers\Bundler\Format\FormatterInterface
  *  - error      : \Throwable (only for BUNDLE_PROCESS_ERROR)
  */
 class Processor

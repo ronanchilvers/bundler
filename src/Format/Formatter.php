@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output;
+namespace Ronanchilvers\Bundler\Format;
 
-use Ronanchilvers\Bundler\Output\FormatterInterface;
-use Ronanchilvers\Bundler\Output\Traits\DecorateTrait;
+use Ronanchilvers\Bundler\Format\FormatterInterface;
+use Ronanchilvers\Bundler\Format\Traits\DecorateTrait;
 use Ronanchilvers\Bundler\Path\Bundle;
 
 abstract class Formatter implements FormatterInterface

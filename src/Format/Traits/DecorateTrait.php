@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Traits;
+namespace Ronanchilvers\Bundler\Format\Traits;
 
-use Ronanchilvers\Bundler\Output\FormatterInterface;
-use Ronanchilvers\Bundler\Output\Traits\ConfigureTrait;
+use Ronanchilvers\Bundler\Format\FormatterInterface;
+use Ronanchilvers\Bundler\Format\Traits\ConfigureTrait;
 
 trait DecorateTrait
 {

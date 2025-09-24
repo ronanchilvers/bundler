@@ -18,7 +18,7 @@ A simple bundler to concatenate and version static files, optionally writing cor
 ```html
 <?php
 use Ronanchilvers\Bundler\Bundler;
-use Ronanchilvers\Bundler\Output\Decorator\SRI;
+use Ronanchilvers\Bundler\Format\Decorator\SRI;
 ?>
 <html>
     <head>

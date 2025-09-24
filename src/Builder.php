@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler;
 
-use Ronanchilvers\Bundler\Output\Formatter;
-use Ronanchilvers\Bundler\Output\FormatterInterface;
+use Ronanchilvers\Bundler\Format\Formatter;
+use Ronanchilvers\Bundler\Format\FormatterInterface;
 use Ronanchilvers\Bundler\Path\Bundle;
 use Ronanchilvers\Bundler\Events\Dispatcher;
 use Ronanchilvers\Bundler\Events\EventNames;
