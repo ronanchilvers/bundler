@@ -7,7 +7,7 @@ namespace Ronanchilvers\Bundler\Format\Traits;
 use Ronanchilvers\Bundler\Format\FormatterInterface;
 use Ronanchilvers\Bundler\Format\Traits\ConfigureTrait;
 
-trait DecorateTrait
+trait DecorateTrait1
 {
     use ConfigureTrait;
 

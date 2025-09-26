@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler\Format\Decorator;
 
-use Ronanchilvers\Bundler\Format\Decorator\Decorator;
+use Ronanchilvers\Bundler\Format\Decorator;
 use Ronanchilvers\Bundler\Format\Traits\FileTrait;
 use Ronanchilvers\Bundler\Path\Bundle;
 

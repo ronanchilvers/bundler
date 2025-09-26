@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Format\Decorator;
+namespace Ronanchilvers\Bundler\Format;
 
 use Ronanchilvers\Bundler\Format\FormatterInterface;
-use Ronanchilvers\Bundler\Format\Traits\DecorateTrait;
+use Ronanchilvers\Bundler\Format\Traits\ConfigureTrait;
 use Ronanchilvers\Bundler\Path\Bundle;
 
 abstract class Decorator implements FormatterInterface
 {
-    use DecorateTrait;
+    use ConfigureTrait;
 
     private FormatterInterface $inner;
 

@@ -14,18 +14,4 @@ interface FormatterInterface
      * @param Bundle $bundle
      */
     public function render(Bundle $bundle): Bundle;
-
-    /**
-     * Decorate this formatter with a decorator class.
-     *
-     * Implementations typically provided via a trait (e.g. DecorateTrait).
-     *
-     * @param class-string<FormatterInterface> $class
-     * @param array<int|string,mixed> $config
-     * @return FormatterInterface
-     */
-    public function decorate(
-        string $class,
-        array $config = [],
-    ): FormatterInterface;
 }
