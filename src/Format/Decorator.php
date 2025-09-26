@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Decorator;
+namespace Ronanchilvers\Bundler\Format;
 
-use Ronanchilvers\Bundler\Output\FormatterInterface;
-use Ronanchilvers\Bundler\Output\Traits\DecorateTrait;
+use Ronanchilvers\Bundler\Format\FormatterInterface;
+use Ronanchilvers\Bundler\Format\Traits\ConfigureTrait;
 use Ronanchilvers\Bundler\Path\Bundle;
 
 abstract class Decorator implements FormatterInterface
 {
-    use DecorateTrait;
+    use ConfigureTrait;
 
     private FormatterInterface $inner;
 
@@ -33,7 +33,9 @@ abstract class Decorator implements FormatterInterface
         return $this->inner->render($bundle);
     }
 
-    protected function setup(): void {}
+    protected function setup(): void
+    {
+    }
 
     /**
      * Allow the decorator to adjust the bundle (add / remove

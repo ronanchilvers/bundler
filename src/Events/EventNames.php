@@ -20,6 +20,10 @@ namespace Ronanchilvers\Bundler\Events;
  *  - BUNDLE_PROCESS_AFTER   : After successful rendering
  *  - BUNDLE_PROCESS_ERROR   : An exception occurred during rendering (error in payload)
  *
+ * Output handling lifecycle:
+ *  - OUTPUT_HANDLE_BEFORE   : Immediately before an output handler is invoked
+ *  - OUTPUT_HANDLE_AFTER    : After successful output handling
+ *
  * File watcher lifecycle:
  *  - WATCHER_START          : Watcher loop about to begin
  *  - WATCHER_STOP           : Watcher loop is terminating (graceful stop)
@@ -47,4 +51,8 @@ final class EventNames
     public const WATCHER_START         = 'watcher.start';
     public const WATCHER_STOP          = 'watcher.stop';
     public const WATCHER_FILE_MODIFIED = 'watcher.file.modified';
+
+    // Output handling events
+    public const OUTPUT_HANDLE_BEFORE  = 'output.handle.before';
+    public const OUTPUT_HANDLE_AFTER   = 'output.handle.after';
 }

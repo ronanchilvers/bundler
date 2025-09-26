@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Ronanchilvers\Bundler;
 
-use Ronanchilvers\Bundler\Output\Formatter;
-use Ronanchilvers\Bundler\Output\FormatterInterface;
+use Ronanchilvers\Bundler\Format\Formatter;
+use Ronanchilvers\Bundler\Format\FormatterInterface;
+use Ronanchilvers\Bundler\Output\Handler;
+use Ronanchilvers\Bundler\Output\HandlerInterface;
 use Ronanchilvers\Bundler\Path\Bundle;
 use Ronanchilvers\Bundler\Events\Dispatcher;
 use Ronanchilvers\Bundler\Events\EventNames;
@@ -39,25 +41,36 @@ class Builder
             $settings["globals"] ?: [],
         );
         $globalDecorators = @$settings["decorators"] ?: [];
+        $globalHandler = @$settings["handler"] ?: [];
         foreach ($settings["bundles"] as $name => $bundleDefinition) {
             $events?->emit(EventNames::CONFIG_BUNDLE_START, [
                 $name,
                 $bundleDefinition,
             ]);
-            $decorators = array_merge(
+            $decoratorSettings = array_merge(
                 $globalDecorators,
                 @$bundleDefinition["decorators"] ?: [],
             );
+
+            // Build the formatter
             if (!isset($bundleDefinition["formatter"])) {
                 throw new \InvalidArgumentException(
                     'No formatter specified for bundle \'' . $name . '\'',
                 );
             }
             $formatter = Formatter::factory($bundleDefinition["formatter"]);
-            foreach ($decorators as $class => $dSettings) {
+            foreach ($decoratorSettings as $type => $dSettings) {
                 $config = array_merge($globalSettings, $dSettings ?: []);
-                $formatter = $formatter->decorate($class, $config);
+                $formatter = Formatter::decorate($type, $formatter, $config);
             }
+
+            // Build the output handler
+            $handlerSettings = array_merge(
+                $globalHandler,
+                @$bundleDefinition["handler"] ?: [],
+            );
+            $handler = Handler::factory($handlerSettings["type"], $handlerSettings);
+
             $pathBundle = new Bundle(
                 events: $events,
             );
@@ -79,16 +92,20 @@ class Builder
         return $instance;
     }
 
-    protected $bundles = [];
+    protected Dispatcher $events;
+    protected array $bundles;
 
-    public function __construct(protected ?Dispatcher $events = null)
+    public function __construct(Dispatcher $events)
     {
+        $this->events = $events ?? new Dispatcher();
+        $this->bundles = [];
     }
 
     public function addBundle(
         string $name,
         FormatterInterface $formatter,
         Bundle $bundle,
+        HandlerInterface $handler,
     ): static {
         $this->bundles[$name] = [
             "formatter" => $formatter,

@@ -16,6 +16,12 @@ class Element
     protected ?string $content = null;
     protected bool $selfClosing = false;
 
+    /**
+     * @param string $tag The HTML tag name
+     * @param array<string,string> $attributes Key-value pairs of attributes
+     * @param string|null $content The inner content of the element (if not self-closing)
+     * @param bool $selfClosing Whether the tag is self-closing (e.g. <img />, <br />)
+     */
     public function __construct(string $tag, array $attributes = [], ?string $content = null, bool $selfClosing = false)
     {
         $this->tag = $tag;
@@ -24,6 +30,11 @@ class Element
         $this->selfClosing = $selfClosing;
     }
 
+    /**
+     * Set the inner content of the element
+     * @param string|null $content The content to set, or null to clear
+     * @return $this Fluent interface
+     */
     public function setContent(?string $content): static
     {
         $this->content = $content;
