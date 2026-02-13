@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Traits;
+namespace Ronanchilvers\Bundler\Format\Traits;
 
 trait ConfigureTrait
 {

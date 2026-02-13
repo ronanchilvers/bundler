@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Formatter\Script;
+namespace Ronanchilvers\Bundler\Format\Formatter\Script;
 
-use Ronanchilvers\Bundler\Output\Formatter\Script as BaseScript;
+use Ronanchilvers\Bundler\Format\Formatter\Script as BaseScript;
 use Ronanchilvers\Bundler\Path\Bundle;
 
 class Module extends BaseScript

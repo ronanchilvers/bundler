@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Ronanchilvers\Bundler\Output\Formatter;
+namespace Ronanchilvers\Bundler\Format\Formatter;
 
 use Ronanchilvers\Bundler\Manifest;
-use Ronanchilvers\Bundler\Output\Formatter;
+use Ronanchilvers\Bundler\Format\Formatter;
 use Ronanchilvers\Bundler\Path\Bundle;
 
-class Stylesheet extends Formatter
+class Script extends Formatter
 {
     public function render(Bundle $bundle): Bundle
     {
         $tags = [];
         foreach ($bundle as $path) {
-            $tag = '<link rel="stylesheet" href="' .
+            $tag = '<script src="' .
                 htmlspecialchars($path) .
                 '"';
             $attributeArray = $bundle->attributes($path);
@@ -23,7 +23,7 @@ class Stylesheet extends Formatter
                 $attributes[] = $key . '="' . htmlspecialchars((string)$value) . '"';
             }
             $tag .= ' ' . implode(" ", $attributes);
-            $tag .= '>';
+            $tag .= '></script>';
 
             $tags[] = $tag;
         }
